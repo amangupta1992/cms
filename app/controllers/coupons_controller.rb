@@ -103,7 +103,7 @@ class CouponsController < ApplicationController
     end
     if coupon.coupon_type == 'single-use-per-user' # checking for applied coupon row if coupon is of type single use per user
       if user_id != nil
-        applied_coupon = AppliedCoupon.find_by(user_id: user_id, coupon_id: coupon.id)
+        applied_coupon = AppliedCoupon.find_by(user_id: user_id, coupon_id: coupon.id, is_delete: false)
         if applied_coupon != nil
           render json: generate_response('This coupon is single use coupon and already applied against your user')
           return
@@ -119,12 +119,15 @@ class CouponsController < ApplicationController
       render json: generate_response('Limit of usage for this coupon has been reached')
       return
     end
-    AppliedCouponsHelper.create(user_id,coupon.id) #adding a applied coupon row to record how many time coupon is applied.
-    if coupon.save
-      render json: success_response_for_coupon(nil,nil)
-    else
-      render json: generate_response(coupon.errors.full_messages)
+    ActiveRecord::Base.transaction do
+      if coupon.save!
+        AppliedCouponsHelper.create(user_id,coupon.id) #adding a applied coupon row to record how many time coupon is applied.
+        render json: success_response_for_coupon(nil,nil)
+      else
+        render json: generate_response(coupon.errors.full_messages)
+      end
     end
+
   end
 
   def display
