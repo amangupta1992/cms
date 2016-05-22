@@ -92,6 +92,11 @@ class CouponsController < ApplicationController
       render json: generate_response('not a valid coupon.')
       return
     end
+    if coupon.is_delete
+      render json: generate_response('This coupon is disabled.')
+      return
+    end
+
     if coupon.valid_upto != nil and coupon.valid_upto < Time.now
       render json: generate_response('coupon code is expired')
       return
