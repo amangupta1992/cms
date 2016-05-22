@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160521163559) do
+ActiveRecord::Schema.define(version: 20160522144354) do
 
   create_table "applied_coupons", force: :cascade do |t|
     t.integer  "user_id",    limit: 11
@@ -31,5 +31,7 @@ ActiveRecord::Schema.define(version: 20160521163559) do
     t.datetime "updated_at",                             null: false
     t.boolean  "is_delete",              default: false, null: false
   end
+
+  add_index "coupons", ["coupon_code"], name: "index_coupons_on_coupon_code", unique: true
 
 end
