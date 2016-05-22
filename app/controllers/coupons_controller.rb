@@ -47,6 +47,10 @@ class CouponsController < ApplicationController
     id = params[:id]
     valid_upto = params[:'valid-upto']
     usage_limit = params[:'n']
+    if id == nil or id.to_i == 0
+      render json: generate_response('Id not available or Not a valid id'),status: 400
+      return
+    end
     if valid_upto != nil
       begin
         Date.parse(valid_upto)
@@ -56,6 +60,10 @@ class CouponsController < ApplicationController
       end
     end
     coupon = Coupon.find(id)
+    if coupon == nil
+      render json: generate_response('Not a valid id'),status: 400
+      return
+    end
     coupon.valid_upto = valid_upto
     if coupon.coupon_type == 'multi-use' and usage_limit != nil
         if coupon.usage_count <= usage_limit
@@ -75,9 +83,13 @@ class CouponsController < ApplicationController
   def apply
     coupon_code = params[:coupon]
     user_id = params[:user_id]
+    if coupon_code == nil
+      render json: generate_response('please enter coupon.'),status: 400
+      return
+    end
     coupon = Coupon.find_by_coupon_code(coupon_code)
     if coupon == nil
-      render json: generate_response('coupon code is expired')
+      render json: generate_response('not a valid coupon.')
       return
     end
     if coupon.valid_upto != nil and coupon.valid_upto < Time.now
@@ -92,7 +104,7 @@ class CouponsController < ApplicationController
           return
         end
       else
-        render json: generate_response('This coupon is single use coupon and user id is required to apply this coupon')
+        render json: generate_response('This coupon is single use coupon and user id is required to apply this coupon'),status: 400
         return
       end
     end
